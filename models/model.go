@@ -39,10 +39,24 @@ func (m Model) Generate(ctx context.Context, req Request) (*Response, error) {
 	return m.provider.Generate(ctx, req)
 }
 
+type Role string
+
+const (
+	RoleSystem    Role = "system"
+	RoleUser      Role = "user"
+	RoleAssistant Role = "assistant"
+)
+
+type Message struct {
+	Role    Role   `json:"role"`
+	Content string `json:"content"`
+}
+
 type Request struct {
 	Model        string
 	SystemPrompt string
 	Instructions []string
+	History      []Message
 	Input        string
 }
 

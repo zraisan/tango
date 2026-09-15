@@ -8,19 +8,24 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"github.com/zraisan/gotique"
 	"github.com/zraisan/gotique/models"
-	"github.com/zraisan/gotique/providers/openai"
+	"github.com/zraisan/gotique/providers/openailike"
 )
 
 func main() {
-	provider := openai.New(os.Getenv("OPENAI_API_KEY"))
-	model := models.New("gpt-4.1-mini", provider)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+	provider := openailike.New(os.Getenv("LLM_API_KEY"), os.Getenv("LLM_BASE_URL"))
+	model := models.New(os.Getenv("LLM_MODEL"), provider)
 
 	agent := gotique.NewAgent(gotique.Agent{
 		Name:               "assistant",
 		Model:              model,
-		SystemPrompt:       "You are a helpful assistant.",
+		SystemPrompt:       "You are a helpful assistant. You start every response with 'Howdy'",
 		Instructions:       []string{"Answer clearly and concisely."},
 		NumHistoryMessages: 5,
 	})

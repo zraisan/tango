@@ -1,4 +1,4 @@
-package openai
+package openailike
 
 import (
 	"bytes"
@@ -18,9 +18,8 @@ type Provider struct {
 }
 
 type request struct {
-	Model        string         `json:"model"`
-	Instructions string         `json:"instructions,omitempty"`
-	Input        []inputMessage `json:"input"`
+	Model    string         `json:"model"`
+	Messages []inputMessage `json:"messages"`
 }
 
 type inputMessage struct {
@@ -29,18 +28,17 @@ type inputMessage struct {
 }
 
 type response struct {
-	OutputText string `json:"output_text"`
-	Output     []struct {
-		Type    string `json:"type"`
-		Content []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		} `json:"content"`
-	} `json:"output"`
+	Choices []struct {
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+	} `json:"choices"`
 }
 
 func New(apiKey string, endpoint ...string) *Provider {
 	providerEndpoint := "https://api.openai.com/v1/responses"
+	fmt.Printf(endpoint[0])
 	if len(endpoint) > 0 && endpoint[0] != "" {
 		providerEndpoint = endpoint[0]
 	}
@@ -60,6 +58,12 @@ func (p *Provider) Generate(ctx context.Context, modelReq models.Request) (*mode
 	instructionParts = append(instructionParts, modelReq.Instructions...)
 
 	input := make([]inputMessage, 0, len(modelReq.History)+1)
+
+	input = append(input, inputMessage{
+		Role:    string(models.RoleSystem),
+		Content: strings.Join(instructionParts, "\n"),
+	})
+
 	for _, msg := range modelReq.History {
 		input = append(input, inputMessage{
 			Role:    string(msg.Role),
@@ -73,9 +77,8 @@ func (p *Provider) Generate(ctx context.Context, modelReq models.Request) (*mode
 	})
 
 	body := request{
-		Model:        modelReq.Model,
-		Instructions: strings.Join(instructionParts, "\n"),
-		Input:        input,
+		Model:    modelReq.Model,
+		Messages: input,
 	}
 
 	payload, err := json.Marshal(body)
@@ -92,6 +95,7 @@ func (p *Provider) Generate(ctx context.Context, modelReq models.Request) (*mode
 	httpReq.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(httpReq)
+	fmt.Printf("HTTP Response:", resp, "\nError:", err)
 	if err != nil {
 		return nil, err
 	}
@@ -118,22 +122,8 @@ func (p *Provider) Generate(ctx context.Context, modelReq models.Request) (*mode
 }
 
 func (r *response) text() string {
-	if r.OutputText != "" {
-		return r.OutputText
+	if len(r.Choices) > 0 {
+		return r.Choices[0].Message.Content
 	}
-
-	var parts []string
-	for _, output := range r.Output {
-		if output.Type != "message" {
-			continue
-		}
-
-		for _, content := range output.Content {
-			if content.Type == "output_text" {
-				parts = append(parts, content.Text)
-			}
-		}
-	}
-
-	return strings.Join(parts, "")
+	return ""
 }
