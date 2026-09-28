@@ -1,4 +1,4 @@
-# gotique
+# tango
 
 ![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
@@ -24,7 +24,7 @@ runtime graph — an agent is a struct, and running it is a method call.
 ## Install
 
 ```sh
-go get github.com/zraisan/gotique
+go get github.com/zraisan/tango
 ```
 
 ## Quick Start
@@ -38,16 +38,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/zraisan/gotique"
-	"github.com/zraisan/gotique/models"
-	"github.com/zraisan/gotique/providers/openai"
+	"github.com/zraisan/tango"
+	"github.com/zraisan/tango/models"
+	"github.com/zraisan/tango/providers/openai"
 )
 
 func main() {
 	provider := openai.New(os.Getenv("OPENAI_API_KEY"))
 	model := models.New("gpt-4.1-mini", provider)
 
-	agent := gotique.NewAgent(gotique.Agent{
+	agent := tango.NewAgent(tango.Agent{
 		Name:         "assistant",
 		Model:        model,
 		SystemPrompt: "You are a helpful assistant.",
@@ -97,7 +97,7 @@ order and returns the first successful response. If every model fails, the last
 error is returned.
 
 ```go
-agent := gotique.NewAgent(gotique.Agent{
+agent := tango.NewAgent(tango.Agent{
 	Name:  "assistant",
 	Model: models.New("gpt-4.1", provider),
 	FallbackModels: []models.Model{
@@ -154,7 +154,7 @@ and everything else unchanged.
 ## Source Layout
 
 ```
-gotique/
+tango/
 ├── agent.go              Agent definition, sessions, message types, Run loop
 ├── models/
 │   └── model.go          Provider interface, Model wrapper, Request/Response
@@ -163,7 +163,7 @@ gotique/
 │       └── openai.go     OpenAI Responses API provider
 ├── examples/
 │   └── simple/           Minimal single-turn example
-├── cmd/gotique/          CLI entry point (placeholder)
+├── cmd/tango/          CLI entry point (placeholder)
 └── internal/             Internal packages
 ```
 
