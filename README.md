@@ -19,6 +19,8 @@ runtime graph — an agent is a struct, and running it is a method call.
 - System prompt and instructions composed independently of the user input
 - OpenAI Responses API provider with configurable endpoint for proxies and
   OpenAI-compatible servers
+- OpenAI-like Chat Completions provider for Ollama, Groq, vLLM, and other
+  OpenAI-compatible servers
 - One external dependency (`google/uuid`); everything else is the standard library
 
 ## Install
@@ -134,6 +136,13 @@ proxies, gateways, and OpenAI-compatible servers.
 provider := openai.New(apiKey, "https://my-gateway.internal/v1/responses")
 ```
 
+For servers that speak the Chat Completions format instead, use `openailike.New`
+with the full chat completions URL:
+
+```go
+provider := openailike.New(apiKey, "http://localhost:11434/v1/chat/completions")
+```
+
 ## Writing a Provider
 
 A provider is anything that satisfies one method:
@@ -159,8 +168,10 @@ tango/
 ├── models/
 │   └── model.go          Provider interface, Model wrapper, Request/Response
 ├── providers/
-│   └── openai/
-│       └── openai.go     OpenAI Responses API provider
+│   ├── openai/
+│   │   └── openai.go     OpenAI Responses API provider
+│   └── openailike/
+│       └── openailike.go OpenAI-like Chat Completions provider
 ├── examples/
 │   └── simple/           Minimal single-turn example
 ├── cmd/tango/          CLI entry point (placeholder)
@@ -179,6 +190,7 @@ Implemented:
 - Model wrapper with validation
 - Fallback chain
 - OpenAI Responses API provider
+- OpenAI-like Chat Completions provider
 - Session and message types (`Session`, `Message`, `Role`)
 
 In progress:

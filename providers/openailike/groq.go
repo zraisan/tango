@@ -37,7 +37,7 @@ type response struct {
 }
 
 func New(apiKey string, endpoint ...string) *Provider {
-	providerEndpoint := "https://api.openai.com/v1/responses"
+	providerEndpoint := "http://localhost:11434/v1/chat/completions"
 	fmt.Printf(endpoint[0])
 	if len(endpoint) > 0 && endpoint[0] != "" {
 		providerEndpoint = endpoint[0]
